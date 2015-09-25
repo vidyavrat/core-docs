@@ -46,7 +46,7 @@ As any mature and advanced application development framework, .NET has many powe
 * Asynchronous support
 * Dynamic language features
 * Code contracts
-* Native interoperability
+* `Native interoperability`_
 
 
 Automatic memory management

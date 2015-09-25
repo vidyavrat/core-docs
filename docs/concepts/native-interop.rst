@@ -9,12 +9,7 @@ To refresh your memory, the two main ways of doing native interoperability are:
 * Platform Invoke (P/Invoke)
 * COM interoperability
 
-You might be wondering why would you ever want or need to do something like this. 
-After all, .NET implementations usually come with very rich class libraries and 
-with `NuGet <http://www.nuget.org/>`_ package manager you have access to even 
-more managed APIs. So, really, why mess with unmanaged code at all?
-
-There are a couple of reasons:
+There are a couple of reasons why you would want to call into native code:
 
 * Operating Systems come with a large volume of APIs that are 
   not present in the managed class libraries. A prime example for this would be 
@@ -246,7 +241,9 @@ using the ``ComVisible`` attribute on specific members of the type.
 
 Of course, this is just scratching the surface of COM interoperability, and if 
 you dig into this topic, you will soon find more details. Also, it is important 
-to note that COM interop is available only on Windows. 
+to note that COM interop is available only on Windows, and on the .NET 
+Framework; it is not available on .NET Core. You can read more about various 
+editions of .NET in the :doc:`../getting-started/overview` topic.
 
 More resources
 --------------
