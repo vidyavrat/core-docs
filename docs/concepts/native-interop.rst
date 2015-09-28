@@ -4,11 +4,6 @@ Native interoperability
 In this document we will dive a little bit deeper into all three ways of doing 
 "native interoperability" that are available on the .NET platform. 
 
-To refresh your memory, the two main ways of doing native interoperability are:
-
-* Platform Invoke (P/Invoke)
-* COM interoperability
-
 There are a couple of reasons why you would want to call into native code:
 
 * Operating Systems come with a large volume of APIs that are 
@@ -211,7 +206,12 @@ provide separate from the implementation. These contracts, or *interfaces* in
 COM terminology, are the primary types that you deal with. They are similar in 
 some regard to C# interfaces (or Java interfaces), but have some peculiarities; 
 the entire scope of writing COM objects is beyond the scope of this article, however 
-there are some resources in the `More resources`_ section.
+there are some resources in the `More resources`_ section. 
+
+However, it is good to note two very important things about COM interop: 
+1. COM interop is available only on Windows.
+2. It is available on the desktop .NET Framework and not available on .NET Core. 
+You can read more about various editions of .NET in the :doc:`../getting-started/overview` topic.
 
 Interoperability between COM objects and managed code is similar to the way 
 P/Invoke works. In the managed world, you don't deal with COM types, you deal 
@@ -240,10 +240,7 @@ of the managed type are visible to the consuming COM code. You can control this
 using the ``ComVisible`` attribute on specific members of the type. 
 
 Of course, this is just scratching the surface of COM interoperability, and if 
-you dig into this topic, you will soon find more details. Also, it is important 
-to note that COM interop is available only on Windows, and on the .NET 
-Framework; it is not available on .NET Core. You can read more about various 
-editions of .NET in the :doc:`../getting-started/overview` topic.
+you dig into this topic, you will soon find more details. Also, 
 
 More resources
 --------------
