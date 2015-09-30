@@ -4,29 +4,43 @@ Native interoperability
 In this document we will dive a little bit deeper into all three ways of doing 
 "native interoperability" that are available on the .NET platform. 
 
-There are a couple of reasons why you would want to call into native code:
+There are a few of reasons why you would want to call into native code:
 
 * Operating Systems come with a large volume of APIs that are 
   not present in the managed class libraries. A prime example for this would be 
   access to hardware or operating system management functions.
-* Communicating with components that are written in unmanaged languages usually 
-  means using P/Invoke. This covers components written in other managed languages,
-  such as Java for instance.
+* Communicating with other components that have or can produce C-style ABIs 
+  (native ABIs). This covers, for example, Java code that is exposed via 
+  `Java Native Interface (JNI) <http://docs.oracle.com/javase/8/docs/technotes/guides/jni/>`_ 
+  or any other managed language that could produce a native component. 
 * On Windows, most of the software that gets installed, such as Microsoft Office
   suite, registers COM components that represent their programs and allow developers 
   to automate them or use them. This also requires native interoperability.
 
-There are certainly more situations where it is apt to use native code, especially 
-those that are specific for a given developer's scenario. 
+Of course, the list above does not cover all of the potential situations and 
+scenarios in which the developer would want/like/need to interface with native 
+components. .NET class library, for instance, uses the native interoperability 
+support to implement a fair number of its APIs, like console support and 
+manipulation, file system access and others. However, it is important to note 
+that there is an option, should one need it.
 
+.. note::
+    Most of the examples in this document will be presented for all three 
+    supported platforms for .NET Core (Windows, Linux, OS X). However, for some 
+    short and illustrative examples, I have decided to leave just one sample 
+    that will use Windows filenames and extensions (i.e. "dll" for libraries). 
+    This does not mean that those features are not available on Linux or OS X, 
+    it was done merely for conveince sake. 
+    
 Platform Invoke (P/Invoke)
 --------------------------
 P/Invoke is a technology that allows you to access structs, callbacks and functions
 in unmanaged libraries from your managed code. Most of the P/Invoke API is contained 
 in two namespaces: ``System`` and ``System.Runtime.InteropServices``. Using these 
-two namespaces will allow you access to the attributes
+two namespaces will allow you access to the attributes that describe how you 
+want to communicate with the native component. 
 
-Let's start from the most common example, and that is reusing unmanaged functions 
+Let's start from the most common example, and that is calling unmanaged functions 
 in your managed code. Let's show a message box from a command-line application:
 
 .. code-block:: c#
@@ -61,6 +75,54 @@ invoke unmanaged functions from managed code. Let's step through the example:
 The rest of the example is just invoking the method as you would any other managed 
 method. 
 
+The sample is similar for OS X. One thing that needs to change is, of course, 
+the name of the library in the ``DllImport`` attribute, as OS X has a different 
+scheme of naming dynamic libraries. The sample below uses the ``getpid(2)`` 
+function to get the process ID of the application and print it out to the console. 
+
+.. code-block:: c#
+    :linenos: 
+
+    using System;
+    using System.Runtime.InteropServices;
+
+    namespace PInvokeSamples {
+        public static class Program {
+            
+            [DllImport("libSystem.dylib")]
+            private static extern int getpid();
+
+            public static void Main(string[] args){
+                int pid = getpid();
+                Console.WriteLine(pid);
+            }
+        }
+    }
+
+It is similar on Linux, of course. The function name is same, since ``getpid(2)`` 
+is `POSIX <https://en.wikipedia.org/wiki/POSIX>`_ system call. 
+
+.. code-block:: c#
+    :linenos:
+
+    using System;
+    using System.Runtime.InteropServices;
+
+    namespace PInvokeSamples {
+        public static class Program {
+            
+            [DllImport("libc.so")]
+            private static extern int getpid();
+
+            public static void Main(string[] args){
+                int pid = getpid();
+                Console.WriteLine(pid);
+            }
+        }
+    }
+
+Invoking managed code from unmanaged code
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Of course, the runtime allows communication to flow both ways 
 which enables you to call into managed artifacts from native functions, using 
 function pointers. The closest thing to a function pointer in managed code is a 
@@ -126,14 +188,14 @@ the runtime *marshals* the types.
 
 Type marshalling
 ^^^^^^^^^^^^^^^^
-**Marshalling** is the process of packing up types when they need to cross the 
+**Marshalling** is the process of transforming types when they need to cross the 
 managed boundary into native and vice versa. 
 
-Why is this needed? Simply put, the types in the managed and unmanaged world 
+The reason marshalling is needed is because the types in the managed and unmanaged world 
 are different. In managed world, for instance, you have a ``String``, while in 
 the unmanaged world strings can be Unicode ("wide"), non-Unicode, null-terminated, 
-ASCII, etc. By default, the .NET runtime will try to do the Right Thing and for
-many applications leaving it to its own devices is usually fine. 
+ASCII, etc. By default, the P/Invoke subsystem will try to do the Right Thing 
+based on the default behavior which you can see on `MSDN <https://msdn.microsoft.com/en-us/library/zah6xy75.aspx>`_.
 
 However, for those situations where you need extra control, you can employ the 
 ``MarshalAs`` attribute to tell the runtime what is the expected type in the 
@@ -248,6 +310,7 @@ More resources
 * `PInvoke.net wiki <http://www.pinvoke.net>`_ an excellent Wiki with information 
   on common Win32 APIs and how to call them.
 * `P/Invoke on MSDN <https://msdn.microsoft.com/en-us/library/zbz07712.aspx>`_
+* `Mono documentation on P/Invoke <http://www.mono-project.com/docs/advanced/pinvoke/>`_ 
 * `COM basics <https://msdn.microsoft.com/en-us/library/windows/desktop/ms694363(v=vs.85).aspx>`_ 
 * `COM Interop on MSDN <https://msdn.microsoft.com/en-us/library/z6tx9dw3.aspx>`_
 * `tlimp.exe reference <https://msdn.microsoft.com/en-us/library/tt0cf3sx%28v=vs.110%29.aspx?f=255&MSPPError=-2147217396>`_
