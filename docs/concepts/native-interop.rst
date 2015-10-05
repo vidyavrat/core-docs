@@ -89,10 +89,12 @@ function to get the process ID of the application and print it out to the consol
     namespace PInvokeSamples {
         public static class Program {
             
+            // Import the libc and define the method corresponding to the native function. 
             [DllImport("libSystem.dylib")]
             private static extern int getpid();
 
             public static void Main(string[] args){
+                // Invoke the function and get the process ID. 
                 int pid = getpid();
                 Console.WriteLine(pid);
             }
@@ -111,10 +113,12 @@ is `POSIX <https://en.wikipedia.org/wiki/POSIX>`_ system call.
     namespace PInvokeSamples {
         public static class Program {
             
-            [DllImport("libc.so")]
+            // Import the libc and define the method corresponding to the native function. 
+            [DllImport("libc.so.6")]
             private static extern int getpid();
 
             public static void Main(string[] args){
+                // Invoke the function and get the process ID. 
                 int pid = getpid();
                 Console.WriteLine(pid);
             }
@@ -180,6 +184,114 @@ With this in mind, let's walk through the example:
   to output the handle to the console.
 * Finally, in line #19 we invoke the external method and pass in the delegate.
 
+The Linux and OS X examples are shown below. For them, we use the ``ftw`` function 
+that can be found in ``libc``, the C library. This function is used to traverse 
+directory hierarchies and it takes a pointer to a function as one of its parameters. 
+The said function has the following signature: 
+``int (*fn) (const char *fpath, const struct stat *sb, int typeflag)``. 
+
+.. code-block:: c#
+    :linenos:
+
+    using System;
+    using System.Runtime.InteropServices;
+
+    namespace PInvokeSamples {
+            public static class Program {
+                    
+                    // Define a delegate that has the same signature as the native function.
+                    delegate int DirClbk(string fName, StatClass stat, int typeFlag);
+                    
+                    // Import the libc and define the method to represent the native function.
+                    [DllImport("libc.so.6")]
+                    static extern int ftw(string dirpath, DirClbk cl, int descriptors);
+                    
+                    // Implement the above DirClbk delegate; this one just prints out the filename that is passed to it. 
+                    static int DisplayEntry(string fName, StatClass stat, int typeFlag) {
+                            Console.WriteLine(fName);
+                            return 0;
+                    }
+                    
+                    public static void Main(string[] args){
+                            // Call the native function. Note the second parameter which represents the delegate (callback). 
+                            ftw(".", DisplayEntry, 10);
+                    }
+            }
+            
+            // The native callback takes a pointer to a struct. The below class 
+            // represents that struct in managed code. You can find more information 
+            // about this in the section on marshalling below. 
+            [StructLayout(LayoutKind.Sequential)]
+            public class StatClass {
+                    public uint DeviceID;
+                    public uint InodeNumber;
+                    public uint Mode;
+                    public uint HardLinks;
+                    public uint UserID;
+                    public uint GroupID;
+                    public uint SpecialDeviceID;
+                    public ulong Size;
+                    public ulong BlockSize;
+                    public uint Blocks;
+                    public long TimeLastAccess;
+                    public long TimeLastModification;
+                    public long TimeLastStatusChange;
+            }
+    }
+
+
+OS X example uses the same function, and the only difference is the argument 
+to the ``DllImport`` attribute, as OS X keeps ``libc`` in a different place. 
+
+.. code-block:: c#
+    :linenos:
+
+    using System;
+    using System.Runtime.InteropServices;
+
+    namespace PInvokeSamples {
+            public static class Program {
+                    
+                    // Define a delegate that has the same signature as the native function.
+                    delegate int DirClbk(string fName, StatClass stat, int typeFlag);
+                    
+                    // Import the libc and define the method to represent the native function.
+                    [DllImport("libSystem.dylib")]
+                    static extern int ftw(string dirpath, DirClbk cl, int descriptors);
+                    
+                    // Implement the above DirClbk delegate; this one just prints out the filename that is passed to it. 
+                    static int DisplayEntry(string fName, StatClass stat, int typeFlag) {
+                            Console.WriteLine(fName);
+                            return 0;
+                    }
+                    
+                    public static void Main(string[] args){
+                            // Call the native function. Note the second parameter which represents the delegate (callback). 
+                            ftw(".", DisplayEntry, 10);
+                    }
+            }
+            
+            // The native callback takes a pointer to a struct. The below class 
+            // represents that struct in managed code. You can find more information 
+            // about this in the section on marshalling below. 
+            [StructLayout(LayoutKind.Sequential)]
+            public class StatClass {
+                    public uint DeviceID;
+                    public uint InodeNumber;
+                    public uint Mode;
+                    public uint HardLinks;
+                    public uint UserID;
+                    public uint GroupID;
+                    public uint SpecialDeviceID;
+                    public ulong Size;
+                    public ulong BlockSize;
+                    public uint Blocks;
+                    public long TimeLastAccess;
+                    public long TimeLastModification;
+                    public long TimeLastStatusChange;
+            }
+    }
+
 Both of the above examples depend on parameters, and in both cases, the parameters 
 are given as managed types. Runtime does the "right thing" and processes these 
 into its equivalents on the other side. Since this process is really important 
@@ -191,15 +303,14 @@ Type marshalling
 **Marshalling** is the process of transforming types when they need to cross the 
 managed boundary into native and vice versa. 
 
-The reason marshalling is needed is because the types in the managed and unmanaged world 
-are different. In managed world, for instance, you have a ``String``, while in 
+The reason marshalling is needed is because the types in the managed and unmanaged 
+code are different. In managed code, for instance, you have a ``String``, while in 
 the unmanaged world strings can be Unicode ("wide"), non-Unicode, null-terminated, 
 ASCII, etc. By default, the P/Invoke subsystem will try to do the Right Thing 
 based on the default behavior which you can see on `MSDN <https://msdn.microsoft.com/en-us/library/zah6xy75.aspx>`_.
-
 However, for those situations where you need extra control, you can employ the 
-``MarshalAs`` attribute to tell the runtime what is the expected type in the 
-unmanaged world. For instance, if we want the string to be sent as a null-terminated 
+``MarshalAs`` attribute to specify what is the expected type on the unmanaged 
+side. For instance, if we want the string to be sent as a null-terminated 
 ANSI string, we could do it like this:
 
 .. code-block:: c#
@@ -241,10 +352,10 @@ play.
 
 The example above shows off a simple example of calling into ``GetSystemTime()`` 
 function. The interesting bit is on line 4. The attribute specifies that the 
-fields of the class should be mapped sequentially on pack-sized boundaries, 
-similarly to the way a C struct is packed. It also means that the field names 
-in the class are not important; only their order is important, and it needs to
-correspond to its unmanaged target, which is shown below:
+fields of the class should be mapped sequentially to the struct on the other 
+(unmanaged) side. This means that the naming of the fields is not important, 
+only their order is important, as it needs to correspond to the unmanaged struct, 
+shown below: 
 
 .. code-block:: c
 
@@ -257,53 +368,37 @@ correspond to its unmanaged target, which is shown below:
       WORD wMinute;
       WORD wSecond;
       WORD wMilliseconds;
-    } SYSTEMTIME, *PSYSTEMTIME;
+    } SYSTEMTIME, *PSYSTEMTIME*;
+
+We already saw the Linux and OS X example for this in the previous example. It is 
+shown again below. 
+
+.. code-block:: c#
+
+        [StructLayout(LayoutKind.Sequential)]
+        public class StatClass {
+                public uint DeviceID;
+                public uint InodeNumber;
+                public uint Mode;
+                public uint HardLinks;
+                public uint UserID;
+                public uint GroupID;
+                public uint SpecialDeviceID;
+                public ulong Size;
+                public ulong BlockSize;
+                public uint Blocks;
+                public long TimeLastAccess;
+                public long TimeLastModification;
+                public long TimeLastStatusChange;
+        }
+
+The ``StatClass`` class represents a structure that is returned by the ``stat`` 
+system call on UNIX systems. It represents information about a given file. The 
+class above is the stat struct representation in managed code. Again, the fields 
+in the class have to be in the same order as the native struct (you can find these 
+by perusing man pages on your favorite UNIX implementation) and they have to be 
+of the same underlying type. 
     
-
-COM interoperability
---------------------
-COM stands for **Component Object Model**. The idea behind COM was to facilitate code 
-reuse by allowing libraries to define the contract of the functionality they 
-provide separate from the implementation. These contracts, or *interfaces* in 
-COM terminology, are the primary types that you deal with. They are similar in 
-some regard to C# interfaces (or Java interfaces), but have some peculiarities; 
-the entire scope of writing COM objects is beyond the scope of this article, however 
-there are some resources in the `More resources`_ section. 
-
-However, it is good to note two very important things about COM interop: 
-1. COM interop is available only on Windows.
-2. It is available on the desktop .NET Framework and not available on .NET Core. 
-You can read more about various editions of .NET in the :doc:`../getting-started/overview` topic.
-
-Interoperability between COM objects and managed code is similar to the way 
-P/Invoke works. In the managed world, you don't deal with COM types, you deal 
-with C# objects, and the runtime marshals your calls into those objects to the 
-COM subsystem using something that is called **Runtime-Callable Wrappers (RCW)**. 
-Runtime also does all of the house cleaning, such as object life cycle, type 
-conversions and similar. 
-
-These wrappers are exposed in your code by generating proxy types for the managed 
-language that you want. This is done via the **tlimp.exe** tool command-line 
-tool (the full name is Type Library Importer). This tool will consume the COM 
-interface that you point it to, and generate a *COM interop asembly*, which will 
-contain managed types that correspond to the interfaces. You can then reference 
-these this assembly from your code and work with the objects like they are managed 
-types. 
-
-As with P/Invoke, COM interoperability allows managed types to be exposed to the 
-COM subsystem. This is done through a proxy called **COM-Callable Wrappers (CCW)**. 
-They operate in the same manner as RCW, only in different direction, from COM into 
-managed world. They also implement the basic required interfaces by the COM 
-protocol, ``IUnknown`` and ``IDispatch``. The way to expose managed types is to 
-first define an assembly attribute that specifies a GUID; this GUID identifies 
-the COM type library. We then use the **tlbexp.exe** (Type Library Exporter) 
-command line tool to generate a COM type library. By default, all public members 
-of the managed type are visible to the consuming COM code. You can control this 
-using the ``ComVisible`` attribute on specific members of the type. 
-
-Of course, this is just scratching the surface of COM interoperability, and if 
-you dig into this topic, you will soon find more details. Also, 
-
 More resources
 --------------
 
@@ -311,7 +406,3 @@ More resources
   on common Win32 APIs and how to call them.
 * `P/Invoke on MSDN <https://msdn.microsoft.com/en-us/library/zbz07712.aspx>`_
 * `Mono documentation on P/Invoke <http://www.mono-project.com/docs/advanced/pinvoke/>`_ 
-* `COM basics <https://msdn.microsoft.com/en-us/library/windows/desktop/ms694363(v=vs.85).aspx>`_ 
-* `COM Interop on MSDN <https://msdn.microsoft.com/en-us/library/z6tx9dw3.aspx>`_
-* `tlimp.exe reference <https://msdn.microsoft.com/en-us/library/tt0cf3sx%28v=vs.110%29.aspx?f=255&MSPPError=-2147217396>`_
-* `tlbexp.exe reference <https://msdn.microsoft.com/en-us/library/hfzzah2c(v=vs.110).aspx>`_ 
