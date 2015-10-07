@@ -50,10 +50,13 @@ in your managed code. Let's show a message box from a command-line application:
 
     public class Program {
     
+        // Import user32.dll (containing the function we need) and define 
+        // the method corresponding to the native function. 
         [DllImport("user32.dll")]
         public static extrn int MessageBox(IntPtr hWnd, String text, String caption, int options);
 
         public static void Main(string[] args) {
+            // Invoke the function as a regular managed method. 
             MessageBox(IntPtr.Zero, "Command-line message box", "Attention!", 0);
         }
     }
@@ -148,17 +151,22 @@ else.
 
         class Program {
 
+            // Define a delegate that corresponds to the unmanaged function.
             delegate bool EnumWC(IntPtr hwnd, IntPtr lParam);
 
+            // Import user32.dll (containing the function we need) and define 
+            // the method corresponding to the native function. 
             [DllImport("user32.dll")]
             static extern int EnumWindows(EnumWC hWnd, IntPtr lParam);
 
+            // Define the implementation of the delegate; here, we simply output the window handle.
             static bool OutputWindow(IntPtr hwnd, IntPtr lParam) {
                 Console.WriteLine(hwnd.ToInt64());
                 return true;
             }
 
             static void Main(string[] args) {
+                // Invoke the method; note the delegate as a first parameter. 
                 EnumWindows(OutputWindow, IntPtr.Zero);
             }
         }
@@ -197,46 +205,48 @@ The said function has the following signature:
     using System.Runtime.InteropServices;
 
     namespace PInvokeSamples {
-            public static class Program {
-                    
-                    // Define a delegate that has the same signature as the native function.
-                    delegate int DirClbk(string fName, StatClass stat, int typeFlag);
-                    
-                    // Import the libc and define the method to represent the native function.
-                    [DllImport("libc.so.6")]
-                    static extern int ftw(string dirpath, DirClbk cl, int descriptors);
-                    
-                    // Implement the above DirClbk delegate; this one just prints out the filename that is passed to it. 
-                    static int DisplayEntry(string fName, StatClass stat, int typeFlag) {
-                            Console.WriteLine(fName);
-                            return 0;
-                    }
-                    
-                    public static void Main(string[] args){
-                            // Call the native function. Note the second parameter which represents the delegate (callback). 
-                            ftw(".", DisplayEntry, 10);
-                    }
-            }
-            
-            // The native callback takes a pointer to a struct. The below class 
-            // represents that struct in managed code. You can find more information 
-            // about this in the section on marshalling below. 
-            [StructLayout(LayoutKind.Sequential)]
-            public class StatClass {
-                    public uint DeviceID;
-                    public uint InodeNumber;
-                    public uint Mode;
-                    public uint HardLinks;
-                    public uint UserID;
-                    public uint GroupID;
-                    public uint SpecialDeviceID;
-                    public ulong Size;
-                    public ulong BlockSize;
-                    public uint Blocks;
-                    public long TimeLastAccess;
-                    public long TimeLastModification;
-                    public long TimeLastStatusChange;
-            }
+        public static class Program {
+                
+                // Define a delegate that has the same signature as the native function.
+                delegate int DirClbk(string fName, StatClass stat, int typeFlag);
+                
+                // Import the libc and define the method to represent the native function.
+                [DllImport("libc.so.6")]
+                static extern int ftw(string dirpath, DirClbk cl, int descriptors);
+                
+                // Implement the above DirClbk delegate; 
+                // this one just prints out the filename that is passed to it. 
+                static int DisplayEntry(string fName, StatClass stat, int typeFlag) {
+                        Console.WriteLine(fName);
+                        return 0;
+                }
+                
+                public static void Main(string[] args){
+                        // Call the native function. 
+                        // Note the second parameter which represents the delegate (callback). 
+                        ftw(".", DisplayEntry, 10);
+                }
+        }
+        
+        // The native callback takes a pointer to a struct. The below class 
+        // represents that struct in managed code. You can find more information 
+        // about this in the section on marshalling below. 
+        [StructLayout(LayoutKind.Sequential)]
+        public class StatClass {
+                public uint DeviceID;
+                public uint InodeNumber;
+                public uint Mode;
+                public uint HardLinks;
+                public uint UserID;
+                public uint GroupID;
+                public uint SpecialDeviceID;
+                public ulong Size;
+                public ulong BlockSize;
+                public uint Blocks;
+                public long TimeLastAccess;
+                public long TimeLastModification;
+                public long TimeLastStatusChange;
+        }
     }
 
 
@@ -259,14 +269,16 @@ to the ``DllImport`` attribute, as OS X keeps ``libc`` in a different place.
                     [DllImport("libSystem.dylib")]
                     static extern int ftw(string dirpath, DirClbk cl, int descriptors);
                     
-                    // Implement the above DirClbk delegate; this one just prints out the filename that is passed to it. 
+                    // Implement the above DirClbk delegate; 
+                    // this one just prints out the filename that is passed to it. 
                     static int DisplayEntry(string fName, StatClass stat, int typeFlag) {
                             Console.WriteLine(fName);
                             return 0;
                     }
                     
                     public static void Main(string[] args){
-                            // Call the native function. Note the second parameter which represents the delegate (callback). 
+                            // Call the native function. 
+                            // Note the second parameter which represents the delegate (callback). 
                             ftw(".", DisplayEntry, 10);
                     }
             }
@@ -299,7 +311,7 @@ to writing quality native interop code, let's take a look at what happens when
 the runtime *marshals* the types. 
 
 Type marshalling
-^^^^^^^^^^^^^^^^
+----------------
 **Marshalling** is the process of transforming types when they need to cross the 
 managed boundary into native and vice versa. 
 
@@ -318,6 +330,9 @@ ANSI string, we could do it like this:
     [DllImport("somenativelibrary.dll"]
     static extern int MethodA([MarshalAs(UnmanagedType.LPStr) string parameter);
 
+
+Marshalling classes and structs    
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Another aspect of type marshalling is how to pass in a struct to an unmanaged method.
 For instance, some of the unmanaged methods require a struct as a parameter. 
 In these cases, we need to create a corresponding struct or a class in managed 
