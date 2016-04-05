@@ -94,10 +94,14 @@ namespace DictionaryHowTo
                 for (int i = 0; i < 2; i++)
                 {
                     if (cities.TryAdd(data[i].Name, data[i]))
+                    {
                         Console.WriteLine("Added {0} on thread {1}", data[i],
                             Thread.CurrentThread.ManagedThreadId);
+                    }
                     else 
+                    {
                         Console.WriteLine("Could not add {0}", data[i]);
+                    }
                 }
             });
 
@@ -106,10 +110,14 @@ namespace DictionaryHowTo
                 for (int i = 2; i < data.Length; i++)
                 {
                     if (cities.TryAdd(data[i].Name, data[i]))
+                    {
                         Console.WriteLine("Added {0} on thread {1}", data[i],
                             Thread.CurrentThread.ManagedThreadId);
+                    }
                     else
+                    {
                         Console.WriteLine("Could not add {0}", data[i]);
+                    }
                 }
             });
 
@@ -152,7 +160,9 @@ namespace DictionaryHowTo
                     // Here we make sure the city really is the same city we already have.
                     // (Support for multiple cities of the same name is left as an exercise for the reader.)
                     if (ci != existingVal)
+                    {
                         throw new ArgumentException("Duplicate city names are not allowed: {0}.", ci.Name);
+                    }
 
                     // The only updatable fields are the temerature array and lastQueryDate.
                     existingVal.lastQueryDate = DateTime.Now;
@@ -247,17 +257,23 @@ namespace DictionaryHowTo
         {
             // Real implementation left as exercise for the reader.
             if (String.CompareOrdinal(name, "Caracas") == 0)
+            {
                 return new CityInfo() { Name = "Caracas", 
                                         Longitude = 10.5M, 
                                         Latitude = -66.916667M,
                                         RecentHighTemperatures = new int[] { 91, 89, 91, 91, 87, 90, 91 } };
+            }
             else if (String.CompareOrdinal(name, "Buenos Aires") == 0)
+            {
                 return new CityInfo() { Name = "Buenos Aires", 
                                         Longitude = -34.61M, 
                                         Latitude = -58.369997M, 
                                         RecentHighTemperatures = new int[] { 80, 86, 89, 91, 84, 86, 88 } };
+            }
             else
+            {
                 throw new ArgumentException("Cannot find any data for {0}", name);
+            }
         }
     }
 }
