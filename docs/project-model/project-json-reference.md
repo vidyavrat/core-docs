@@ -1,7 +1,7 @@
 # Project.json reference
 
  **Note**
-> This topic is likley to change before release! You can track the status of this issue through our public GitHub issue tracker.
+> This topic is preliminary and subject to change in the next release. You can track the status of this issue through our public GitHub issue tracker.
 
 
 * [name](#name)
@@ -82,7 +82,7 @@ For example:
 ## version
 Type: String
 
-The [Semver](http://semver.org/spec/v1.0.0.html) version of the project, also used for the nuget package.
+The [Semver](http://semver.org/spec/v1.0.0.html) version of the project, also used for the NuGet package.
 
 For example:
 
@@ -154,7 +154,7 @@ For example:
 ## projectUrl
 Type: String
 
-The url for the homepage of the project.
+The URL for the homepage of the project.
 
 For example:
 
@@ -166,7 +166,7 @@ For example:
 ## licenseUrl
 Type: String
 
-The url for the licence the project uses.
+The URL for the license the project uses.
 
 For example:
 
@@ -178,7 +178,7 @@ For example:
 ## iconUrl
 Type: String
 
-The url for an icon that will be used in various places such as the package explorer.
+The URL for an icon that will be used in various places such as the package explorer.
 
 For example:
 
@@ -190,7 +190,7 @@ For example:
 ## compilerName
 Type: String
 
-The name of the compiler used for this project. `csc` by default. Currently `csc`, the c# compiler or `fsc`, the f# compiler are supported.
+The name of the compiler used for this project. `csc` by default. Currently, `csc` (the C# compiler) or `fsc` (the F# compiler) are supported.
  
 For example:
 
@@ -202,7 +202,7 @@ For example:
 ## testRunner
 Type: String
 
-The name of the testrunner, such as [NUnit](http://nunit.org/) or [xUnit](http://xunit.github.io/), to use with this project, setting this also marks the project as a test project.
+The name of the test runner, such as [NUnit](http://nunit.org/) or [xUnit](http://xunit.github.io/), to use with this project. Setting this also marks the project as a test project.
 
 For example:
 
@@ -250,7 +250,7 @@ For example:
 ## language
 Type: String
 
-The (human) language of the project, corresponds to the "neutral-language" compiler argument.
+The (human) language of the project. Corresponds to the "neutral-language" compiler argument.
 
 For example:
 
@@ -274,7 +274,7 @@ For example:
 ## requireLicenseAcceptance
 Type: Boolean
 
-A boolean that causes a prompt to accept the package license when installing the package to be shown. Only used for nuget packages, ignored in other uses.
+A boolean that causes a prompt to accept the package license when installing the package to be shown. Only used for NuGet packages, ignored in other uses.
 
 For example:
 
@@ -298,7 +298,7 @@ For example:
 ## compile
 Type: String or String[] with a globbing pattern
 
-Specifies what files are included in compilation.
+Specifies which files are included in compilation.
 
 For example:
 
@@ -310,7 +310,7 @@ For example:
 ## content
 Type: String or String[] with a globbing pattern
 
-Specifies what files are included in the build output, such as images or fonts.
+Specifies which files are included in the build output, such as images or fonts.
 
 For example:
 
@@ -334,7 +334,7 @@ For example:
 ## preprocess
 Type: String or String[] with a globbing pattern
 
-Specifies what files are included in preprocessing.
+Specifies which files are included in preprocessing.
 
 For example:
 
@@ -346,7 +346,7 @@ For example:
 ## publishExclude
 Type: String or String[] with a globbing pattern
 
-Specifies what files are excluded from publishing.
+Specifies which files are excluded from publishing.
 
 For example:
 
@@ -358,7 +358,7 @@ For example:
 ## shared
 Type: String or String[] with a globbing pattern
 
-Specifies what files are shared, this is used for library export.
+Specifies which files are shared, this is used for library export.
 
 For example:
 
@@ -384,7 +384,7 @@ For example:
 ## packInclude
 Type: String or String[] with a globbing pattern
 
-Specifies what files are included when creating the NuGet package.
+Specifies which files are included when creating the NuGet package.
 
 For example:
 
@@ -396,7 +396,7 @@ For example:
 ## exclude
 Type: String or String[] with a globbing pattern
 
-Specifies what files to exclude from the build.
+Specifies which files to exclude from the build.
 
 For example:
 
@@ -408,7 +408,7 @@ For example:
 ## contentBuiltIn
 Type: String or String[] with a globbing pattern
 
-Specifies what files are considerd content by the build.
+Specifies which files are considered content by the build.
 
 For example:
 
@@ -420,7 +420,7 @@ For example:
 ## compileBuiltIn
 Type: String or String[] with a globbing pattern
 
-Specifies what files are included in compilation.
+Specifies which files are included in compilation.
 
 For example:
 
@@ -444,7 +444,7 @@ For example:
 ## excludeBuiltIn
 Type: String or String[] with a globbing pattern
 
-Specifies what files to exclude from the build.
+Specifies which files to exclude from the build.
 
 For example:
 
@@ -499,7 +499,7 @@ Commands are deprecated in the cli. (?)
 ## scripts
 Type: Object
 
-An object that defines scripts run during the build proces. each key in this object identifies where in the build the script is run, each value is either a string with the script to run or an array of strings containg scripts that will run in order.
+An object that defines scripts run during the build process. Each key in this object identifies where in the build the script is run. Each value is either a string with the script to run or an array of strings containing scripts that will run in order.
 The supported events are:
 * precompile
 * postcompile
@@ -519,7 +519,7 @@ For example:
 ## buildOptions
 Type: Object
 
-An object whose properties control various aspects of compilation, the valid properties are listed below. Can also be specified per target framework as described in the [frameworks section](#frameworks)
+An object whose properties control various aspects of compilation. The valid properties are listed below. Can also be specified per target framework as described in the [frameworks section](#frameworks)
 
 For example:
 
@@ -688,7 +688,7 @@ For example:
 ### emitEntryPoint
 Type: Boolean
 
-Creates an executable if set to true, otherwise the project will produce a `.dll`.
+Creates an executable if set to true; otherwise, the project will produce a `.dll` file.
 
 For example:
 
@@ -702,7 +702,7 @@ For example:
 ### xmlDoc
 Type: Boolean
 
-Enables xml docs to be generated from comments in the source code.
+Enables XML documentation to be generated from triple-slash comments in the source code.
 
 For example:
 
@@ -748,7 +748,7 @@ For example:
 ## configurations
 Type: Object
 
-An object whos properties define different configurations for this project, such as Debug and Release. Each value is an object that can contain a `compilationOptions` object with options specific for this coniguration.
+An object whose properties define different configurations for this project, such as Debug and Release. Each value is an object that can contain a `compilationOptions` object with options specific for this configuration.
 
 For example:
 
@@ -764,7 +764,7 @@ For example:
 ## frameworks
 Type: Object
 
-Specifies what frameworks this project supports, such as .NET Framework or Universal Windows Platform (UWP). Must be a valid Target Framework Moniker (TFM). Each value is an object that can contain information specific to this framework such as `compilationoptions`, `analyzerOptions`, `dependencies` as well as the properties in the following sections.
+Specifies which frameworks this project supports, such as the .NET Framework or Universal Windows Platform (UWP). Must be a valid Target Framework Moniker (TFM). Each value is an object that can contain information specific to this framework such as `compilationoptions`, `analyzerOptions`, `dependencies` as well as the properties in the following sections.
 
 For example:
 
@@ -796,7 +796,7 @@ For example:
 ### frameworkAssemblies
 Type: Object
 
-Similar to dependencies but contains reference to assemblies in the GAC that are not nuget packages. Can also specify the version to use as well as the dependency type. This is used when targeting .NET Framework and Portable Class Library(PCL) targets. You can only build a project with this specified on Windows.
+Similar to dependencies but contains reference to assemblies in the GAC that are not NuGet packages. Can also specify the version to use as well as the dependency type. This is used when targeting .NET Framework and Portable Class Library (PCL) targets. You can only build a project with this specified on Windows.
 
 For example:
 
