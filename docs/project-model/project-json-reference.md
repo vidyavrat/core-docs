@@ -797,11 +797,6 @@ Type: Integer
 
 TODO
 
-#### gcConcurrent
-Type: Boolean
-
-TODO
-
 ## packOptions
 Type: Object
 
